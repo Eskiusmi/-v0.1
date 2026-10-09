@@ -263,6 +263,80 @@ button { font: inherit; color: inherit; }
 .tool:disabled { opacity: .45; cursor: default; }
 .tool svg { width: 16px; height: 16px; }
 .tool.confirm { color: #A3362A; font-weight: 600; }
+.tools-left { display: flex; align-items: center; gap: 10px; }
+.purse {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 13px; color: var(--slate); font-variant-numeric: tabular-nums;
+}
+.purse svg { width: 14px; height: 14px; }
+.purse.bump { animation: bump .6s ease; }
+@keyframes bump { 40% { color: var(--cobalt); transform: scale(1.12); } }
+
+/* 第二条提示：选怎么换 */
+.choose { display: none; padding: 4px 0 2px; }
+.dock.choosing .ask-area { display: none; }
+.dock.choosing .choose { display: block; animation: rise .3s cubic-bezier(.2, .7, .2, 1) both; }
+.choose h2 { font: 600 18px/1.3 var(--serif); margin: 0 0 4px; }
+.choose p { margin: 0 0 12px; color: var(--slate); font-size: 14px; }
+.choose .actions { flex-direction: column; }
+.choose .btn { flex: none; width: 100%; }
+.choose .btn:disabled { opacity: .55; cursor: default; }
+.choose-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+.fine { font-size: 12px; color: var(--slate); }
+
+/* ---- 联机 ---- */
+.iconbtn {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 1px solid var(--rule); background: var(--glaze); color: var(--slate);
+  display: grid; place-items: center; cursor: pointer; flex: none;
+}
+.iconbtn:hover { color: var(--ink); }
+.iconbtn.on { background: var(--cobalt); border-color: var(--cobalt); color: var(--cobalt-ink); }
+.iconbtn svg { width: 18px; height: 18px; }
+.roomstrip {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 0 12px; padding: 8px 6px 8px 14px;
+  background: var(--wash); border-radius: 12px; font-size: 13px; color: var(--slate);
+}
+.roomstrip b { color: var(--cobalt); font-size: 15px; letter-spacing: .08em; font-variant-numeric: tabular-nums; }
+.roomstrip .people { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.roomstrip .tool { padding: 4px 6px; }
+.who { display: block; font-size: 12px; color: var(--slate); line-height: 1.4; margin-bottom: 1px; }
+.who.mine { color: var(--cobalt); }
+.sysline { text-align: center; font-size: 12px; color: var(--slate); margin: 10px 0; }
+
+.lobby { display: none; padding: 4px 0 2px; }
+/* 结束后也能打开联机面板：盖过 .dock.done .result 的 display:block */
+.dock.lobbying .ask-area, .dock.lobbying .result, .dock.lobbying .choose { display: none !important; }
+.dock.lobbying .lobby { display: block; animation: rise .3s cubic-bezier(.2, .7, .2, 1) both; }
+.lobby h2 { font: 600 18px/1.3 var(--serif); margin: 0 0 4px; }
+.lobby p { margin: 0 0 12px; color: var(--slate); font-size: 14px; }
+.lbl { display: block; font-size: 12px; color: var(--slate); margin: 0 0 4px 2px; }
+.text {
+  width: 100%; height: 44px; padding: 0 14px;
+  border: 1px solid var(--rule); border-radius: 12px; background: var(--glaze); color: var(--ink);
+  font: 16px var(--sans); outline: none;
+}
+.text:focus { border-color: var(--cobalt); }
+.lobby .actions { margin: 12px 0 10px; }
+.joinrow { display: flex; gap: 8px; }
+.joinrow .text { flex: 1; letter-spacing: .1em; font-variant-numeric: tabular-nums; }
+.joinrow .btn { flex: none; width: 96px; height: 44px; }
+.lobby .err { color: #A3362A; font-size: 13px; margin: 8px 2px 0; min-height: 1em; }
+
+/* 本地模拟广告（ADS_MOCK=1） */
+.mock-ad {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(16, 20, 28, .92); color: #fff;
+  display: grid; place-items: center; text-align: center;
+  font-family: var(--sans);
+}
+.mock-ad .box { max-width: 300px; padding: 24px; }
+.mock-ad .big { font-size: 40px; font-weight: 700; font-variant-numeric: tabular-nums; margin: 12px 0; }
+.mock-ad button {
+  margin-top: 16px; height: 42px; padding: 0 22px; border-radius: 21px;
+  border: 1px solid rgba(255, 255, 255, .4); background: none; color: #fff; font-size: 15px; cursor: pointer;
+}
 
 .result { display: none; padding: 6px 0 2px; }
 .dock.done .ask-area { display: none; }
@@ -280,6 +354,7 @@ button { font: inherit; color: inherit; }
   border: 1px solid var(--rule); background: var(--glaze); color: var(--ink);
 }
 .btn.primary { background: var(--cobalt); border-color: var(--cobalt); color: var(--cobalt-ink); }
+.btn:disabled { opacity: .55; cursor: default; }
 .btn svg { width: 17px; height: 17px; }
 
 @media (min-width: 640px) {
@@ -299,9 +374,18 @@ button { font: inherit; color: inherit; }
     <span class="tag" id="tagBroth" hidden></span>
     <span class="tag" id="tagGenre" hidden></span>
     <span class="tag" id="tagDiff" hidden></span>
+    <button class="iconbtn" id="roomBtn" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="9" r="2.6"/><path d="M16 14.2c2.6-.3 4.6 1.3 5 4.3"/></svg>
+    </button>
   </header>
 
   <section class="head" id="head">
+    <div class="roomstrip" id="roomStrip" hidden>
+      <span id="roomLabel"></span>
+      <span class="people" id="roomPeople"></span>
+      <button class="tool" id="invite" type="button"></button>
+      <button class="tool" id="leave" type="button"></button>
+    </div>
     <p class="scene" id="scene"></p>
     <button class="fold" id="fold" hidden aria-controls="scene"></button>
 
@@ -326,15 +410,53 @@ button { font: inherit; color: inherit; }
         </button>
       </form>
       <div class="tools">
-        <button class="tool" id="hint" type="button">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z"/></svg>
-          <span id="hintLabel"></span>
-        </button>
+        <div class="tools-left">
+          <button class="tool" id="hint" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z"/></svg>
+            <span id="hintLabel"></span>
+          </button>
+          <span class="purse" id="purse">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/></svg>
+            <span id="purseLabel"></span>
+          </span>
+        </div>
         <button class="tool" id="giveup" type="button">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
           <span id="giveupLabel"></span>
         </button>
       </div>
+    </div>
+
+    <div class="choose" id="choose" role="dialog" aria-labelledby="chooseTitle">
+      <h2 id="chooseTitle"></h2>
+      <p id="chooseLine"></p>
+      <div class="actions">
+        <button class="btn primary" id="payAd" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5z"/></svg>
+          <span id="payAdLabel"></span>
+        </button>
+        <button class="btn" id="payPoints" type="button"></button>
+      </div>
+      <div class="choose-foot">
+        <button class="tool" id="chooseCancel" type="button"></button>
+        <a class="fine" id="adsNote" href="/privacy.html" target="_blank" rel="noopener"></a>
+      </div>
+    </div>
+
+    <div class="lobby" id="lobby" role="dialog" aria-labelledby="lobbyTitle">
+      <h2 id="lobbyTitle"></h2>
+      <p id="lobbyLine"></p>
+      <label class="lbl" for="nick" id="nickLabel"></label>
+      <input class="text" id="nick" maxlength="12" autocomplete="nickname">
+      <div class="actions">
+        <button class="btn primary" id="createRoom" type="button"></button>
+      </div>
+      <div class="joinrow">
+        <input class="text" id="codeInput" inputmode="numeric" pattern="[0-9]*" maxlength="5" autocomplete="off">
+        <button class="btn" id="joinRoom" type="button"></button>
+      </div>
+      <p class="err" id="lobbyErr" role="alert"></p>
+      <div class="choose-foot"><button class="tool" id="lobbyCancel" type="button"></button></div>
     </div>
 
     <div class="result" id="result">
@@ -352,362 +474,6 @@ button { font: inherit; color: inherit; }
 
 </div>
 
-<script>
-/* ---- 所有玩家看得到的文字都在这里。加语言 = 加一个 key。 ---- */
-const I18N = {
-  zh: {
-    bowl: "汤底",
-    count: (r, t) => `已揭开 ${r} / ${t}`,
-    countDone: "全部揭开",
-    diff: "难度",
-    fold: "收起题目", unfold: "展开题目",
-    empty: "提一个能用「是」或「否」回答的问题。每想到一个关键点，汤底就会揭开一段。",
-    inputLabel: "你的问题",
-    placeholder: "问一个能用是或否回答的问题",
-    send: "提问",
-    hint: (u, t) => (u >= t ? "提示已用完" : `提示 ${u}/${t}`),
-    hintTag: "提示",
-    giveup: "揭晓汤底",
-    giveupConfirm: "再点一次揭晓",
-    verdict: { "是": "是", "否": "否", "无关": "无关", "换个问法": "换个问法" },
-    gain: n => (n > 1 ? `汤底揭开了 ${n} 段` : "汤底揭开了一段"),
-    cached: "这个问题问过了，答案不变。",
-    degraded: "裁判暂时没有回应，这一问没有算数，再问一次。",
-    expired: "服务刚刚更新过，这道题已经重新开始。",
-    tooFast: "问得有点快，稍等几秒再问。",
-    netErr: "网络连接不上，检查一下再问一次。",
-    bootErr: "题目没能加载出来，刷新页面再试一次。",
-    exhausted: "题库里的题你都做过了，这一道是重做的。",
-    solvedTitle: "见底了",
-    gaveTitle: "汤底在这儿",
-    solvedLine: (n, h) => `${n} 个问题` + (h ? `，用了 ${h} 次提示。` : "，没用提示。"),
-    gaveLine: n => `问了 ${n} 个问题。`,
-    share: "分享成绩", shared: "已复制到剪贴板",
-    next: "下一碗",
-    shareText: (n, seq, solved, url) =>
-      `海龟汤 ${solved ? `${n} 问见底` : `${n} 问后揭晓`}\n${seq}\n${url}`,
-    hidden: "（未揭开）"
-  }
-};
-const t = I18N.zh;
-const MODE = new URLSearchParams(location.search).get("mode") === "daily" ? "daily" : "fresh";
-const GLYPH = { "是": "■", "否": "□", "无关": "◌" };
-const CHIP = { "是": "yes", "否": "no", "无关": "moot", "换个问法": "again" };
-
-const $ = id => document.getElementById(id);
-const api = (path, body) => fetch(path, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify(body)
-}).then(async r => {
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw Object.assign(new Error(data.error || r.statusText), { data });
-  return data;
-});
-
-let sid = null, puzzle = null;
-let asked = 0, hintsUsed = 0, busy = false, over = false, solved = false;
-let seq = [], revealed = new Map();
-
-/* ---- 静态文案 ---- */
-function paintStatic() {
-  $("bowlName").textContent = t.bowl;
-  $("inputLabel").textContent = t.inputLabel;
-  $("input").placeholder = t.placeholder;
-  $("send").setAttribute("aria-label", t.send);
-  $("giveupLabel").textContent = t.giveup;
-  $("shareLabel").textContent = t.share;
-  $("next").textContent = t.next;
-}
-
-/* ---- 模糊的假字：只用来占位，和真汤底没有任何关系 ---- */
-const POOL = "的一是在不了有和人这中大为上个我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天四日那事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道此变条只没结解问意建月公无系很情者最立代想已通并提直题程展五果料象员位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严";
-function seeded(str) {
-  let h = 2166136261;
-  for (const c of str) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); }
-  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
-}
-function fake(shape, seed) {
-  const rnd = seeded(seed);
-  return [...shape].map(c => (c === "□" ? POOL[Math.floor(rnd() * POOL.length)] : c)).join("");
-}
-
-/* ---- 汤底 ---- */
-function paintBowl() {
-  const box = $("answer");
-  box.textContent = "";
-  puzzle.reveal.forEach((seg, i) => {
-    const span = document.createElement("span");
-    span.dataset.i = i;
-    if (revealed.has(i)) {
-      span.className = "seg";
-      span.textContent = revealed.get(i);
-    } else {
-      span.className = "seg hidden";
-      span.setAttribute("aria-hidden", "true");
-      span.textContent = fake(seg.shape, puzzle.id + ":" + i);
-    }
-    box.append(span);
-  });
-  // 读屏软件读不到假字；告诉它这一段还没揭开
-  const sr = document.createElement("span");
-  sr.className = "sr";
-  sr.textContent = revealed.size < puzzle.reveal.length ? t.hidden : "";
-  box.append(sr);
-  paintCount();
-}
-
-function paintCount() {
-  const keyed = puzzle.reveal.filter(s => s.keyed).length;
-  const shownKeyed = puzzle.reveal.filter((s, i) => s.keyed && revealed.has(i)).length;
-  $("bowlCount").textContent = revealed.size === puzzle.reveal.length ? t.countDone : t.count(shownKeyed, keyed);
-}
-
-function uncover(items, stagger = 0) {
-  items.forEach(({ i, text }, n) => {
-    revealed.set(i, text);
-    const span = $("answer").querySelector(`[data-i="${i}"]`);
-    if (!span) return;
-    setTimeout(() => {
-      span.className = "seg shown";
-      span.removeAttribute("aria-hidden");
-      span.textContent = text;
-      span.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-    }, n * stagger);
-  });
-  const sr = $("answer").querySelector(".sr");
-  if (sr && revealed.size === puzzle.reveal.length) sr.textContent = "";
-  paintCount();
-}
-
-/* ---- 开局 ---- */
-async function boot() {
-  paintStatic();
-  try {
-    const want = new URLSearchParams(location.search).get("p");
-    await start(want || undefined);
-  } catch {
-    $("scene").textContent = t.bootErr;
-    $("input").disabled = true;
-    $("send").disabled = true;
-  }
-}
-
-async function start(puzzleId) {
-  const res = await api("/api/start", { puzzleId, mode: puzzleId ? undefined : MODE });
-  sid = res.sessionId;
-  puzzle = res.puzzle;
-  asked = 0; hintsUsed = 0; busy = false; over = false; solved = false;
-  seq = []; revealed = new Map();
-
-  $("scene").textContent = puzzle.scene;
-  setTag("tagBroth", puzzle.broth, puzzle.broth === "红汤" ? "red" : "");
-  setTag("tagGenre", puzzle.genre);
-  const d = Math.max(1, Math.min(4, puzzle.difficulty || 1));
-  $("tagDiff").hidden = false;
-  $("tagDiff").innerHTML = `${t.diff}<span class="dots" aria-hidden="true">${[1, 2, 3, 4].map(n => `<i class="${n <= d ? "on" : ""}"></i>`).join("")}</span>`;
-  $("tagDiff").setAttribute("aria-label", `${t.diff} ${d} / 4`);
-
-  $("head").classList.remove("compact");
-  paintBowl();
-
-  $("log").innerHTML = "";
-  const empty = document.createElement("p");
-  empty.className = "empty"; empty.id = "empty"; empty.textContent = t.empty;
-  $("log").append(empty);
-  if (res.exhausted) note(t.exhausted, "err");
-
-  $("dock").classList.remove("done");
-  $("input").disabled = false;
-  $("input").value = "";
-  armGiveup(false);
-  paintHint();
-  paintFold();
-  history.replaceState(null, "", `?p=${encodeURIComponent(puzzle.id)}`);
-}
-
-function setTag(id, text, cls = "") {
-  const el = $(id);
-  el.hidden = !text;
-  el.textContent = text || "";
-  el.className = "tag " + cls;
-}
-
-/* ---- 题目太长时可以收起，给问答记录腾地方 ---- */
-function paintFold() {
-  const s = $("scene");
-  const compact = $("head").classList.contains("compact");
-  // 收起状态下量不出真实行数，按展开时的高度算
-  const lh = parseFloat(getComputedStyle(s).lineHeight);
-  const lines = compact ? 3 : Math.round(s.getBoundingClientRect().height / lh);
-  $("fold").hidden = !compact && lines <= 2;
-  $("fold").textContent = compact ? t.unfold : t.fold;
-  $("fold").setAttribute("aria-expanded", String(!compact));
-}
-$("fold").onclick = () => { $("head").classList.toggle("compact"); paintFold(); };
-// 字体晚到、窗口变化都会改变题目的行数：只要题目尺寸变了就重新判断
-new ResizeObserver(() => puzzle && paintFold()).observe($("scene"));
-
-/* ---- 问答记录 ---- */
-function note(text, cls, tag) {
-  const el = document.createElement("div");
-  el.className = "note " + cls;
-  if (tag) { const b = document.createElement("b"); b.textContent = tag; el.append(b); }
-  el.append(document.createTextNode(text));
-  $("log").append(el);
-  scrollLog();
-}
-function sub(row, text, cls = "") {
-  const el = document.createElement("div");
-  el.className = "sub " + cls;
-  el.textContent = text;
-  row.append(el);
-}
-function scrollLog() { $("log").scrollTop = $("log").scrollHeight; }
-
-async function ask(e) {
-  e?.preventDefault();
-  const text = $("input").value.trim();
-  if (!text || busy || over) return;
-  busy = true; $("send").disabled = true;
-  $("empty")?.remove();
-
-  const row = document.createElement("div");
-  row.className = "row pending";
-  row.innerHTML = `<span class="n"></span><span class="q"></span><span class="chip wait" aria-label="等待裁定"></span>`;
-  row.querySelector(".n").textContent = asked + 1;
-  row.querySelector(".q").textContent = text;
-  $("log").append(row);
-  scrollLog();
-  $("input").value = ""; grow();
-
-  try {
-    const r = await api("/api/ask", { sessionId: sid, question: text });
-    const chip = row.querySelector(".chip");
-    chip.className = "chip " + (CHIP[r.verdict] || "moot");
-    chip.removeAttribute("aria-label");
-    chip.textContent = t.verdict[r.verdict] || r.verdict;
-    row.classList.remove("pending");
-
-    if (r.cached) {
-      row.querySelector(".n").textContent = "";
-      sub(row, t.cached);
-    } else if (r.degraded) {
-      row.querySelector(".n").textContent = "";
-      sub(row, t.degraded, "warn");
-    } else if (r.verdict === "换个问法") {
-      row.querySelector(".n").textContent = "";
-      if (r.note) sub(row, r.note);
-    } else {
-      asked = r.asked;
-      seq.push(GLYPH[r.verdict] || "·");
-    }
-
-    const fresh = (r.reveal || []).filter(x => !revealed.has(x.i));
-    if (r.solved) {
-      uncover(fresh, 160);
-      finish(true, fresh.length * 160 + 500);
-    } else if (fresh.length) {
-      sub(row, t.gain(fresh.length), "gain");
-      uncover(fresh);
-    }
-    if (asked === 1 && innerHeight < 760) { $("head").classList.add("compact"); paintFold(); }
-  } catch (err) {
-    row.remove();
-    if (err.message === "session_expired") {
-      note(t.expired, "err");
-      await start(puzzle?.id);
-      $("input").value = text; grow();
-    } else {
-      note({ too_many_requests: t.tooFast }[err.message] || t.netErr, "err");
-      $("input").value = text; grow();
-    }
-  } finally {
-    busy = false;
-    $("send").disabled = over;
-    if (!over) $("input").focus({ preventScroll: true });
-    scrollLog();
-  }
-}
-$("form").addEventListener("submit", ask);
-$("input").addEventListener("keydown", e => {
-  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) ask(e);
-});
-function grow() {
-  const el = $("input");
-  el.style.height = "auto";
-  el.style.height = Math.min(120, el.scrollHeight) + "px";
-}
-$("input").addEventListener("input", grow);
-
-/* ---- 提示 ---- */
-function paintHint() {
-  const total = puzzle?.totalHints || 0;
-  $("hintLabel").textContent = t.hint(hintsUsed, total);
-  $("hint").disabled = over || hintsUsed >= total;
-}
-$("hint").onclick = async () => {
-  try {
-    const r = await api("/api/hint", { sessionId: sid });
-    hintsUsed = r.hintsUsed;
-    note(r.hint, "hint", t.hintTag);
-  } catch (err) {
-    if (err.message === "session_expired") { note(t.expired, "err"); await start(puzzle?.id); }
-  }
-  paintHint();
-};
-
-/* ---- 揭晓：点两次，防误触 ---- */
-let armTimer = null;
-function armGiveup(on) {
-  clearTimeout(armTimer);
-  $("giveup").classList.toggle("confirm", on);
-  $("giveupLabel").textContent = on ? t.giveupConfirm : t.giveup;
-  if (on) armTimer = setTimeout(() => armGiveup(false), 3000);
-}
-$("giveup").onclick = async () => {
-  if (over) return;
-  if (!$("giveup").classList.contains("confirm")) return armGiveup(true);
-  armGiveup(false);
-  try {
-    const r = await api("/api/giveup", { sessionId: sid });
-    const fresh = (r.reveal || []).filter(x => !revealed.has(x.i));
-    uncover(fresh, 160);
-    asked = r.asked;
-    finish(false, fresh.length * 160 + 400);
-  } catch (err) {
-    if (err.message === "session_expired") { note(t.expired, "err"); await start(puzzle?.id); }
-    else note(t.netErr, "err");
-  }
-};
-
-/* ---- 结束 ---- */
-function finish(didSolve, delay) {
-  over = true; solved = didSolve;
-  $("input").disabled = true;
-  $("send").disabled = true;
-  $("head").classList.remove("compact"); paintFold();
-  $("resultTitle").textContent = didSolve ? t.solvedTitle : t.gaveTitle;
-  $("resultLine").textContent = didSolve ? t.solvedLine(asked, hintsUsed) : t.gaveLine(asked);
-  $("shareLabel").textContent = t.share;
-  setTimeout(() => {
-    $("dock").classList.add("done");
-    $("head").scrollTop = 0;
-    requestAnimationFrame(scrollLog);
-  }, Math.min(delay, 1400));
-}
-
-$("share").onclick = async () => {
-  const url = `${location.origin}/?p=${encodeURIComponent(puzzle.id)}`;
-  const text = t.shareText(asked, seq.join(""), solved, url);
-  try {
-    if (navigator.share) await navigator.share({ text });
-    else { await navigator.clipboard.writeText(text); $("shareLabel").textContent = t.shared; }
-  } catch (_) { /* 用户取消分享 */ }
-};
-$("next").onclick = () => start();   // 不指定题目，服务端发一道没做过的
-
-boot();
-</script>
+<script src="/app.js"></script>
 </body>
 </html>

@@ -24,6 +24,7 @@ services:
 
   - type: keyvalue
     name: haigui-sessions
-    plan: free          # 25MB，session 用不完
+    plan: free          # 25MB，对局、积分、房间都用不完
     region: oregon
-    maxmemoryPolicy: allkeys-lru
+    # 满了先淘汰最快过期的：对局（3 小时）先走，积分（1 年）留下
+    maxmemoryPolicy: volatile-ttl

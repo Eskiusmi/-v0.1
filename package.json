@@ -14,7 +14,8 @@
     "test": "node --test test/*.test.mjs",
     "calibrate": "node --env-file-if-exists=.env calibrate.js",
     "cost": "node cost.js",
-    "audit": "node --env-file-if-exists=.env audit.js"
+    "audit": "node --env-file-if-exists=.env audit.js",
+    "import": "node --env-file-if-exists=.env import.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
