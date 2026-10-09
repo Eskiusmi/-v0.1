@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#F2F4F7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#10141C" media="(prefers-color-scheme: dark)">
+<title>海龟汤</title>
+<style>
+/* ------------------------------------------------------------------
+   设计：青花瓷碗。浅瓷白底、钴蓝点缀；汤底那一块是碗，碗沿两道蓝线。
+   整页只有一个动效重点：汤底一段一段由模糊变清楚。
+   ------------------------------------------------------------------ */
+:root {
+  --porcelain: #F2F4F7;   /* 页面底 */
+  --glaze: #FFFFFF;       /* 浮起的表面：碗、输入区 */
+  --ink: #1C2333;         /* 正文 */
+  --slate: #5F6A7D;       /* 次要文字 */
+  --rule: #DCE1EA;        /* 分隔线 */
+  --cobalt: #26428B;      /* 青花蓝 */
+  --cobalt-ink: #FFFFFF;  /* 蓝底上的字 */
+  --wash: #E8EDF8;        /* 淡蓝釉，碗里 */
+  --broth: #F4E3BF;       /* 汤色，刚揭开的那一段 */
+  --broth-ink: #6E4C10;
+  --shadow: 0 1px 2px rgba(28, 35, 51, .06), 0 6px 20px rgba(28, 35, 51, .06);
+
+  --sans: -apple-system, BlinkMacSystemFont, "PingFang SC", "HarmonyOS Sans SC", "MiSans",
+          "Microsoft YaHei UI", "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", "Segoe UI", Roboto, sans-serif;
+  --serif: "Songti SC", "STSong", "Noto Serif SC", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", Georgia, serif;
+  --gutter: 20px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --porcelain: #10141C; --glaze: #171C27; --ink: #E6E9F0; --slate: #98A2B5;
+    --rule: #2A3242; --cobalt: #8EA8F0; --cobalt-ink: #10141C; --wash: #1D2539;
+    --broth: #3B301C; --broth-ink: #EDCD8E;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  }
+}
+:root[data-theme="dark"] {
+  --porcelain: #10141C; --glaze: #171C27; --ink: #E6E9F0; --slate: #98A2B5;
+  --rule: #2A3242; --cobalt: #8EA8F0; --cobalt-ink: #10141C; --wash: #1D2539;
+  --broth: #3B301C; --broth-ink: #EDCD8E;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  background: var(--porcelain);
+  color: var(--ink);
+  font: 15px/1.6 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+}
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }   /* 否则 .fold 的 display:block 会盖掉 hidden */
+:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; border-radius: 6px; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- 顶部：品牌 + 这道题的属性 ---- */
+.bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: calc(env(safe-area-inset-top) + 14px) var(--gutter) 10px;
+}
+.mark {
+  font: 600 20px/1 var(--serif);
+  letter-spacing: .06em;
+  margin-right: auto;
+}
+.tag {
+  font-size: 12px; line-height: 1;
+  color: var(--slate);
+  padding: 6px 9px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.tag.red { color: #A3362A; border-color: #EBC6BF; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tag.red { color: #F0A194; border-color: #5A2E28; } }
+.dots { display: inline-flex; gap: 3px; vertical-align: 1px; margin-left: 4px; }
+.dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--rule); }
+.dots i.on { background: var(--slate); }
+
+/* ---- 题目 + 汤底：固定在上方 ---- */
+.head {
+  flex: none;
+  max-height: 58dvh;
+  overflow-y: auto;
+  padding: 2px var(--gutter) 14px;
+}
+.scene {
+  font: 19px/1.75 var(--serif);
+  margin: 0;
+  text-wrap: pretty;
+}
+.head.compact .scene {
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  font-size: 17px;
+}
+.head.compact .bowl { margin-top: 8px; padding-bottom: 14px; }
+.head.compact .answer {
+  font-size: 15px; line-height: 1.75;
+  max-height: calc(1.75em * 4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.fold {
+  display: block; margin: 4px 0 0 auto;
+  background: none; border: 0; padding: 4px 0;
+  font-size: 13px; color: var(--slate); cursor: pointer;
+}
+.fold:hover { color: var(--ink); }
+
+/* 碗：碗沿两道蓝线，碗底比碗口圆 */
+.bowl {
+  margin-top: 12px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, var(--glaze) 0%, transparent 70%),
+    var(--wash);
+  border-top: 4px double var(--cobalt);
+  border-radius: 14px 14px 30px 30px;
+  padding: 12px 18px 20px;
+  box-shadow: var(--shadow);
+}
+.bowl-top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  margin-bottom: 6px;
+}
+.bowl-name { font-size: 13px; font-weight: 600; color: var(--cobalt); letter-spacing: .04em; }
+.bowl-count { font-size: 12px; color: var(--slate); font-variant-numeric: tabular-nums; }
+.answer {
+  font: 17px/1.85 var(--serif);
+  margin: 0;
+  word-break: break-all;
+}
+.seg { border-radius: 4px; }
+.seg.hidden {
+  color: var(--cobalt);
+  opacity: .6;
+  filter: blur(3.5px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.seg.shown { animation: surface 1.1s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes surface {
+  0%   { filter: blur(3.5px); opacity: .4; background: var(--broth); }
+  45%  { filter: blur(0);   opacity: 1;   background: var(--broth); }
+  100% { filter: blur(0);   opacity: 1;   background: transparent; }
+}
+
+/* ---- 问答记录 ---- */
+.log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 var(--gutter) 12px;
+  -webkit-overflow-scrolling: touch;
+}
+.empty {
+  color: var(--slate);
+  font-size: 14px;
+  margin: 18px 0;
+  max-width: 30em;
+}
+.row {
+  display: grid;
+  grid-template-columns: 1.4em 1fr auto;
+  gap: 8px;
+  align-items: start;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule);
+}
+.row .n { font-size: 12px; color: var(--slate); padding-top: 3px; font-variant-numeric: tabular-nums; }
+.row .q { word-break: break-word; }
+.row.pending .q { color: var(--slate); }
+.sub {
+  grid-column: 2 / -1;
+  font-size: 13px;
+  color: var(--slate);
+  margin-top: -2px;
+}
+.sub.gain { color: var(--cobalt); font-weight: 500; }
+.sub.warn { color: var(--broth-ink); }
+
+.chip {
+  font-size: 13px; line-height: 1;
+  padding: 6px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  min-width: 2.6em; text-align: center;
+}
+.chip.yes   { background: var(--cobalt); color: var(--cobalt-ink); font-weight: 600; }
+.chip.no    { border-color: var(--slate); color: var(--ink); }
+.chip.moot  { border: 1px dashed var(--rule); color: var(--slate); }
+.chip.again { background: var(--broth); color: var(--broth-ink); }
+.chip.wait  { border-color: var(--rule); color: var(--slate); }
+.chip.wait::after { content: "…"; display: inline-block; animation: breathe 1.2s ease-in-out infinite; }
+@keyframes breathe { 50% { opacity: .3; } }
+
+.note {
+  margin: 12px 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+.note.hint { background: var(--wash); }
+.note.hint b { color: var(--cobalt); font-weight: 600; margin-right: 6px; }
+.note.err { color: var(--broth-ink); background: var(--broth); }
+
+/* ---- 底部：输入 / 结果 ---- */
+.dock {
+  flex: none;
+  padding: 10px var(--gutter) calc(env(safe-area-inset-bottom) + 12px);
+  background: var(--porcelain);
+  border-top: 1px solid var(--rule);
+}
+.field {
+  display: flex; align-items: flex-end; gap: 8px;
+  background: var(--glaze);
+  border: 1px solid var(--rule);
+  border-radius: 22px;
+  padding: 5px 5px 5px 16px;
+  box-shadow: var(--shadow);
+}
+.field:focus-within { border-color: var(--cobalt); }
+.field textarea {
+  flex: 1;
+  border: 0; outline: 0; resize: none; background: transparent;
+  color: var(--ink);
+  font: 16px/1.5 var(--sans);   /* 16px 防止 iOS 聚焦时放大 */
+  padding: 7px 0;
+  max-height: 120px;
+}
+.field textarea::placeholder { color: var(--slate); opacity: .8; }
+.send {
+  flex: none;
+  width: 38px; height: 38px;
+  border: 0; border-radius: 50%;
+  background: var(--cobalt); color: var(--cobalt-ink);
+  display: grid; place-items: center;
+  cursor: pointer;
+}
+.send:disabled { background: var(--rule); color: var(--slate); cursor: default; }
+.send svg { width: 18px; height: 18px; }
+
+.tools { display: flex; justify-content: space-between; margin-top: 8px; }
+.tool {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: 0; padding: 6px 4px;
+  font-size: 13px; color: var(--slate); cursor: pointer;
+}
+.tool:hover:not(:disabled) { color: var(--ink); }
+.tool:disabled { opacity: .45; cursor: default; }
+.tool svg { width: 16px; height: 16px; }
+.tool.confirm { color: #A3362A; font-weight: 600; }
+
+.result { display: none; padding: 6px 0 2px; }
+.dock.done .ask-area { display: none; }
+.dock.done .result { display: block; animation: rise .45s cubic-bezier(.2, .7, .2, 1) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+.result h2 { font: 600 22px/1.3 var(--serif); margin: 0 0 4px; }
+.result p { margin: 0 0 14px; color: var(--slate); }
+.actions { display: flex; gap: 10px; }
+.btn {
+  flex: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 46px; border-radius: 23px;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--rule); background: var(--glaze); color: var(--ink);
+}
+.btn.primary { background: var(--cobalt); border-color: var(--cobalt); color: var(--cobalt-ink); }
+.btn svg { width: 17px; height: 17px; }
+
+@media (min-width: 640px) {
+  .app { padding-top: 12px; }
+  .scene { font-size: 20px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="bar">
+    <span class="mark">海龟汤</span>
+    <span class="tag" id="tagBroth" hidden></span>
+    <span class="tag" id="tagGenre" hidden></span>
+    <span class="tag" id="tagDiff" hidden></span>
+  </header>
+
+  <section class="head" id="head">
+    <p class="scene" id="scene"></p>
+    <button class="fold" id="fold" hidden aria-controls="scene"></button>
+
+    <div class="bowl" aria-labelledby="bowlName">
+      <div class="bowl-top">
+        <span class="bowl-name" id="bowlName"></span>
+        <span class="bowl-count" id="bowlCount"></span>
+      </div>
+      <p class="answer" id="answer"></p>
+    </div>
+  </section>
+
+  <main class="log" id="log" aria-live="polite"></main>
+
+  <footer class="dock" id="dock">
+    <div class="ask-area">
+      <form class="field" id="form">
+        <label class="sr" for="input" id="inputLabel"></label>
+        <textarea id="input" rows="1" autocomplete="off" enterkeyhint="send"></textarea>
+        <button class="send" id="send" type="submit">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg>
+        </button>
+      </form>
+      <div class="tools">
+        <button class="tool" id="hint" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.6.5 1 1.2 1.1 2V16h5v-.2c.1-.8.5-1.5 1.1-2A6 6 0 0 0 12 3Z"/></svg>
+          <span id="hintLabel"></span>
+        </button>
+        <button class="tool" id="giveup" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <span id="giveupLabel"></span>
+        </button>
+      </div>
+    </div>
+
+    <div class="result" id="result">
+      <h2 id="resultTitle"></h2>
+      <p id="resultLine"></p>
+      <div class="actions">
+        <button class="btn primary" id="share" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7.5 7.5 12 3l4.5 4.5M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg>
+          <span id="shareLabel"></span>
+        </button>
+        <button class="btn" id="next" type="button"></button>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+/* ---- 所有玩家看得到的文字都在这里。加语言 = 加一个 key。 ---- */
+const I18N = {
+  zh: {
+    bowl: "汤底",
+    count: (r, t) => `已揭开 ${r} / ${t}`,
+    countDone: "全部揭开",
+    diff: "难度",
+    fold: "收起题目", unfold: "展开题目",
+    empty: "提一个能用「是」或「否」回答的问题。每想到一个关键点，汤底就会揭开一段。",
+    inputLabel: "你的问题",
+    placeholder: "问一个能用是或否回答的问题",
+    send: "提问",
+    hint: (u, t) => (u >= t ? "提示已用完" : `提示 ${u}/${t}`),
+    hintTag: "提示",
+    giveup: "揭晓汤底",
+    giveupConfirm: "再点一次揭晓",
+    verdict: { "是": "是", "否": "否", "无关": "无关", "换个问法": "换个问法" },
+    gain: n => (n > 1 ? `汤底揭开了 ${n} 段` : "汤底揭开了一段"),
+    cached: "这个问题问过了，答案不变。",
+    degraded: "裁判暂时没有回应，这一问没有算数，再问一次。",
+    expired: "服务刚刚更新过，这道题已经重新开始。",
+    tooFast: "问得有点快，稍等几秒再问。",
+    netErr: "网络连接不上，检查一下再问一次。",
+    bootErr: "题目没能加载出来，刷新页面再试一次。",
+    exhausted: "题库里的题你都做过了，这一道是重做的。",
+    solvedTitle: "见底了",
+    gaveTitle: "汤底在这儿",
+    solvedLine: (n, h) => `${n} 个问题` + (h ? `，用了 ${h} 次提示。` : "，没用提示。"),
+    gaveLine: n => `问了 ${n} 个问题。`,
+    share: "分享成绩", shared: "已复制到剪贴板",
+    next: "下一碗",
+    shareText: (n, seq, solved, url) =>
+      `海龟汤 ${solved ? `${n} 问见底` : `${n} 问后揭晓`}\n${seq}\n${url}`,
+    hidden: "（未揭开）"
+  }
+};
+const t = I18N.zh;
+const MODE = new URLSearchParams(location.search).get("mode") === "daily" ? "daily" : "fresh";
+const GLYPH = { "是": "■", "否": "□", "无关": "◌" };
+const CHIP = { "是": "yes", "否": "no", "无关": "moot", "换个问法": "again" };
+
+const $ = id => document.getElementById(id);
+const api = (path, body) => fetch(path, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(body)
+}).then(async r => {
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(data.error || r.statusText), { data });
+  return data;
+});
+
+let sid = null, puzzle = null;
+let asked = 0, hintsUsed = 0, busy = false, over = false, solved = false;
+let seq = [], revealed = new Map();
+
+/* ---- 静态文案 ---- */
+function paintStatic() {
+  $("bowlName").textContent = t.bowl;
+  $("inputLabel").textContent = t.inputLabel;
+  $("input").placeholder = t.placeholder;
+  $("send").setAttribute("aria-label", t.send);
+  $("giveupLabel").textContent = t.giveup;
+  $("shareLabel").textContent = t.share;
+  $("next").textContent = t.next;
+}
+
+/* ---- 模糊的假字：只用来占位，和真汤底没有任何关系 ---- */
+const POOL = "的一是在不了有和人这中大为上个我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天四日那事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道此变条只没结解问意建月公无系很情者最立代想已通并提直题程展五果料象员位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严";
+function seeded(str) {
+  let h = 2166136261;
+  for (const c of str) { h ^= c.codePointAt(0); h = Math.imul(h, 16777619); }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return (h >>> 0) / 4294967296; };
+}
+function fake(shape, seed) {
+  const rnd = seeded(seed);
+  return [...shape].map(c => (c === "□" ? POOL[Math.floor(rnd() * POOL.length)] : c)).join("");
+}
+
+/* ---- 汤底 ---- */
+function paintBowl() {
+  const box = $("answer");
+  box.textContent = "";
+  puzzle.reveal.forEach((seg, i) => {
+    const span = document.createElement("span");
+    span.dataset.i = i;
+    if (revealed.has(i)) {
+      span.className = "seg";
+      span.textContent = revealed.get(i);
+    } else {
+      span.className = "seg hidden";
+      span.setAttribute("aria-hidden", "true");
+      span.textContent = fake(seg.shape, puzzle.id + ":" + i);
+    }
+    box.append(span);
+  });
+  // 读屏软件读不到假字；告诉它这一段还没揭开
+  const sr = document.createElement("span");
+  sr.className = "sr";
+  sr.textContent = revealed.size < puzzle.reveal.length ? t.hidden : "";
+  box.append(sr);
+  paintCount();
+}
+
+function paintCount() {
+  const keyed = puzzle.reveal.filter(s => s.keyed).length;
+  const shownKeyed = puzzle.reveal.filter((s, i) => s.keyed && revealed.has(i)).length;
+  $("bowlCount").textContent = revealed.size === puzzle.reveal.length ? t.countDone : t.count(shownKeyed, keyed);
+}
+
+function uncover(items, stagger = 0) {
+  items.forEach(({ i, text }, n) => {
+    revealed.set(i, text);
+    const span = $("answer").querySelector(`[data-i="${i}"]`);
+    if (!span) return;
+    setTimeout(() => {
+      span.className = "seg shown";
+      span.removeAttribute("aria-hidden");
+      span.textContent = text;
+      span.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    }, n * stagger);
+  });
+  const sr = $("answer").querySelector(".sr");
+  if (sr && revealed.size === puzzle.reveal.length) sr.textContent = "";
+  paintCount();
+}
+
+/* ---- 开局 ---- */
+async function boot() {
+  paintStatic();
+  try {
+    const want = new URLSearchParams(location.search).get("p");
+    await start(want || undefined);
+  } catch {
+    $("scene").textContent = t.bootErr;
+    $("input").disabled = true;
+    $("send").disabled = true;
+  }
+}
+
+async function start(puzzleId) {
+  const res = await api("/api/start", { puzzleId, mode: puzzleId ? undefined : MODE });
+  sid = res.sessionId;
+  puzzle = res.puzzle;
+  asked = 0; hintsUsed = 0; busy = false; over = false; solved = false;
+  seq = []; revealed = new Map();
+
+  $("scene").textContent = puzzle.scene;
+  setTag("tagBroth", puzzle.broth, puzzle.broth === "红汤" ? "red" : "");
+  setTag("tagGenre", puzzle.genre);
+  const d = Math.max(1, Math.min(4, puzzle.difficulty || 1));
+  $("tagDiff").hidden = false;
+  $("tagDiff").innerHTML = `${t.diff}<span class="dots" aria-hidden="true">${[1, 2, 3, 4].map(n => `<i class="${n <= d ? "on" : ""}"></i>`).join("")}</span>`;
+  $("tagDiff").setAttribute("aria-label", `${t.diff} ${d} / 4`);
+
+  $("head").classList.remove("compact");
+  paintBowl();
+
+  $("log").innerHTML = "";
+  const empty = document.createElement("p");
+  empty.className = "empty"; empty.id = "empty"; empty.textContent = t.empty;
+  $("log").append(empty);
+  if (res.exhausted) note(t.exhausted, "err");
+
+  $("dock").classList.remove("done");
+  $("input").disabled = false;
+  $("input").value = "";
+  armGiveup(false);
+  paintHint();
+  paintFold();
+  history.replaceState(null, "", `?p=${encodeURIComponent(puzzle.id)}`);
+}
+
+function setTag(id, text, cls = "") {
+  const el = $(id);
+  el.hidden = !text;
+  el.textContent = text || "";
+  el.className = "tag " + cls;
+}
+
+/* ---- 题目太长时可以收起，给问答记录腾地方 ---- */
+function paintFold() {
+  const s = $("scene");
+  const compact = $("head").classList.contains("compact");
+  // 收起状态下量不出真实行数，按展开时的高度算
+  const lh = parseFloat(getComputedStyle(s).lineHeight);
+  const lines = compact ? 3 : Math.round(s.getBoundingClientRect().height / lh);
+  $("fold").hidden = !compact && lines <= 2;
+  $("fold").textContent = compact ? t.unfold : t.fold;
+  $("fold").setAttribute("aria-expanded", String(!compact));
+}
+$("fold").onclick = () => { $("head").classList.toggle("compact"); paintFold(); };
+// 字体晚到、窗口变化都会改变题目的行数：只要题目尺寸变了就重新判断
+new ResizeObserver(() => puzzle && paintFold()).observe($("scene"));
+
+/* ---- 问答记录 ---- */
+function note(text, cls, tag) {
+  const el = document.createElement("div");
+  el.className = "note " + cls;
+  if (tag) { const b = document.createElement("b"); b.textContent = tag; el.append(b); }
+  el.append(document.createTextNode(text));
+  $("log").append(el);
+  scrollLog();
+}
+function sub(row, text, cls = "") {
+  const el = document.createElement("div");
+  el.className = "sub " + cls;
+  el.textContent = text;
+  row.append(el);
+}
+function scrollLog() { $("log").scrollTop = $("log").scrollHeight; }
+
+async function ask(e) {
+  e?.preventDefault();
+  const text = $("input").value.trim();
+  if (!text || busy || over) return;
+  busy = true; $("send").disabled = true;
+  $("empty")?.remove();
+
+  const row = document.createElement("div");
+  row.className = "row pending";
+  row.innerHTML = `<span class="n"></span><span class="q"></span><span class="chip wait" aria-label="等待裁定"></span>`;
+  row.querySelector(".n").textContent = asked + 1;
+  row.querySelector(".q").textContent = text;
+  $("log").append(row);
+  scrollLog();
+  $("input").value = ""; grow();
+
+  try {
+    const r = await api("/api/ask", { sessionId: sid, question: text });
+    const chip = row.querySelector(".chip");
+    chip.className = "chip " + (CHIP[r.verdict] || "moot");
+    chip.removeAttribute("aria-label");
+    chip.textContent = t.verdict[r.verdict] || r.verdict;
+    row.classList.remove("pending");
+
+    if (r.cached) {
+      row.querySelector(".n").textContent = "";
+      sub(row, t.cached);
+    } else if (r.degraded) {
+      row.querySelector(".n").textContent = "";
+      sub(row, t.degraded, "warn");
+    } else if (r.verdict === "换个问法") {
+      row.querySelector(".n").textContent = "";
+      if (r.note) sub(row, r.note);
+    } else {
+      asked = r.asked;
+      seq.push(GLYPH[r.verdict] || "·");
+    }
+
+    const fresh = (r.reveal || []).filter(x => !revealed.has(x.i));
+    if (r.solved) {
+      uncover(fresh, 160);
+      finish(true, fresh.length * 160 + 500);
+    } else if (fresh.length) {
+      sub(row, t.gain(fresh.length), "gain");
+      uncover(fresh);
+    }
+    if (asked === 1 && innerHeight < 760) { $("head").classList.add("compact"); paintFold(); }
+  } catch (err) {
+    row.remove();
+    if (err.message === "session_expired") {
+      note(t.expired, "err");
+      await start(puzzle?.id);
+      $("input").value = text; grow();
+    } else {
+      note({ too_many_requests: t.tooFast }[err.message] || t.netErr, "err");
+      $("input").value = text; grow();
+    }
+  } finally {
+    busy = false;
+    $("send").disabled = over;
+    if (!over) $("input").focus({ preventScroll: true });
+    scrollLog();
+  }
+}
+$("form").addEventListener("submit", ask);
+$("input").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey && !e.isComposing) ask(e);
+});
+function grow() {
+  const el = $("input");
+  el.style.height = "auto";
+  el.style.height = Math.min(120, el.scrollHeight) + "px";
+}
+$("input").addEventListener("input", grow);
+
+/* ---- 提示 ---- */
+function paintHint() {
+  const total = puzzle?.totalHints || 0;
+  $("hintLabel").textContent = t.hint(hintsUsed, total);
+  $("hint").disabled = over || hintsUsed >= total;
+}
+$("hint").onclick = async () => {
+  try {
+    const r = await api("/api/hint", { sessionId: sid });
+    hintsUsed = r.hintsUsed;
+    note(r.hint, "hint", t.hintTag);
+  } catch (err) {
+    if (err.message === "session_expired") { note(t.expired, "err"); await start(puzzle?.id); }
+  }
+  paintHint();
+};
+
+/* ---- 揭晓：点两次，防误触 ---- */
+let armTimer = null;
+function armGiveup(on) {
+  clearTimeout(armTimer);
+  $("giveup").classList.toggle("confirm", on);
+  $("giveupLabel").textContent = on ? t.giveupConfirm : t.giveup;
+  if (on) armTimer = setTimeout(() => armGiveup(false), 3000);
+}
+$("giveup").onclick = async () => {
+  if (over) return;
+  if (!$("giveup").classList.contains("confirm")) return armGiveup(true);
+  armGiveup(false);
+  try {
+    const r = await api("/api/giveup", { sessionId: sid });
+    const fresh = (r.reveal || []).filter(x => !revealed.has(x.i));
+    uncover(fresh, 160);
+    asked = r.asked;
+    finish(false, fresh.length * 160 + 400);
+  } catch (err) {
+    if (err.message === "session_expired") { note(t.expired, "err"); await start(puzzle?.id); }
+    else note(t.netErr, "err");
+  }
+};
+
+/* ---- 结束 ---- */
+function finish(didSolve, delay) {
+  over = true; solved = didSolve;
+  $("input").disabled = true;
+  $("send").disabled = true;
+  $("head").classList.remove("compact"); paintFold();
+  $("resultTitle").textContent = didSolve ? t.solvedTitle : t.gaveTitle;
+  $("resultLine").textContent = didSolve ? t.solvedLine(asked, hintsUsed) : t.gaveLine(asked);
+  $("shareLabel").textContent = t.share;
+  setTimeout(() => {
+    $("dock").classList.add("done");
+    $("head").scrollTop = 0;
+    requestAnimationFrame(scrollLog);
+  }, Math.min(delay, 1400));
+}
+
+$("share").onclick = async () => {
+  const url = `${location.origin}/?p=${encodeURIComponent(puzzle.id)}`;
+  const text = t.shareText(asked, seq.join(""), solved, url);
+  try {
+    if (navigator.share) await navigator.share({ text });
+    else { await navigator.clipboard.writeText(text); $("shareLabel").textContent = t.shared; }
+  } catch (_) { /* 用户取消分享 */ }
+};
+$("next").onclick = () => start();   // 不指定题目，服务端发一道没做过的
+
+boot();
+</script>
+</body>
+</html>
